@@ -58,11 +58,10 @@ Client.prototype.connect = function () {
             _this: 'ServiceInstance'
         });
     })
-    .then(content => {
-        let result = content.result;
-        if (!result.returnval) {
+    .then(result => {
+        if (!result) {
             this.status = 'disconnected';
-            return Promise.reject(content.raw);
+            return Promise.reject();
         }
 
         this.serviceContent = result.returnval;
@@ -74,13 +73,13 @@ Client.prototype.connect = function () {
 
         return this.runCommand('Login', loginArgs);
     })
-    .then(content => {
+    .then(result => {
         this.authCookie = new cookie(this.client.lastResponseHeaders);
         this.client.setSecurity(this.authCookie);
 
-        this.userName = content.result.returnval.userName;
-        this.fullName = content.result.returnval.fullName;
-        this.session = content.result.returnval;
+        this.userName = result.returnval.userName;
+        this.fullName = result.returnval.fullName;
+        this.session = result.returnval;
         this.reconnectCount = 0;
 
         this.status = 'ready';
