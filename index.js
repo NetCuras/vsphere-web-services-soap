@@ -42,48 +42,55 @@ Client.prototype.connect = function () {
 
     this.status = 'connecting';
 
-    return soap.createClientAsync(this.uri, this.clientOpts)
-        .then((client) => {
-            this.client = client;
-            this.client.describe();
-            this.client.setEndpoint(`https://${this.connectionInfo.host}/sdk/vimService.wsdl`);
-            return this.runCommand('RetrieveServiceContent', {
-                _this: 'ServiceInstance'
-            });
-        })
-        .then(content => {
-            let result = content.result;
-            if (!result.returnval) {
-                this.status = 'disconnected';
-                return Promise.reject(content.raw);
+    return new Promise((resolve, reject) => {
+        soap.createClient(this.uri, this.clientOpts, (err, client) => {
+            if (err) {
+                return reject(err);
             }
 
-            this.serviceContent = result.returnval;
-            this.sessionManager = this.serviceContent.sessionManager;
-
-            let loginArgs = Object.assign({
-                _this: this.sessionManager
-            }, this.loginArgs);
-
-            return this.runCommand('Login', loginArgs);
-        })
-        .then(content => {
-            this.authCookie = new cookie(this.client.lastResponseHeaders);
-            this.client.setSecurity(this.authCookie);
-
-            this.userName = content.result.returnval.userName;
-            this.fullName = content.result.returnval.fullName;
-            this.session = content.result.returnval;
-            this.reconnectCount = 0;
-
-            this.status = 'ready';
-
-            return this.session;
-        })
-        .catch(err => {
-            this.status = 'disconnected';
-            return Promise.reject(err);
+            this.client = client;
+            this.client.setEndpoint(`https://${this.connectionInfo.host}/sdk/vimService.wsdl`);
+            return resolve(client);
         });
+    })
+    .then(() => {
+        return this.runCommand('RetrieveServiceContent', {
+            _this: 'ServiceInstance'
+        });
+    })
+    .then(content => {
+        let result = content.result;
+        if (!result.returnval) {
+            this.status = 'disconnected';
+            return Promise.reject(content.raw);
+        }
+
+        this.serviceContent = result.returnval;
+        this.sessionManager = this.serviceContent.sessionManager;
+
+        let loginArgs = Object.assign({
+            _this: this.sessionManager
+        }, this.loginArgs);
+
+        return this.runCommand('Login', loginArgs);
+    })
+    .then(content => {
+        this.authCookie = new cookie(this.client.lastResponseHeaders);
+        this.client.setSecurity(this.authCookie);
+
+        this.userName = content.result.returnval.userName;
+        this.fullName = content.result.returnval.fullName;
+        this.session = content.result.returnval;
+        this.reconnectCount = 0;
+
+        this.status = 'ready';
+
+        return this.session;
+    })
+    .catch(err => {
+        this.status = 'disconnected';
+        return Promise.reject(err);
+    });
 };
 
 Client.prototype.close = function () {
@@ -121,11 +128,7 @@ Client.prototype.runCommand = function (command, arguments) {
                     this.status = 'disconnected';
                 }
 
-                return resolve({
-                    result,
-                    raw,
-                    soapHeader
-                });
+                return resolve(result);
             });
         });
     } else if (this.status === 'disconnected') {
