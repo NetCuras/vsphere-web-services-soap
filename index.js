@@ -7,7 +7,7 @@ function Client(options = {}) {
     this.reconnectCount = 0;
     this.reconnectLimit = options.reconnectLimit || 10;
 
-    let sslVerify = options.sslVerify;
+    let sslVerify = typeof options.sslVerify !== 'undefined' ? sslVerify : false;
 
     if (sslVerify) {
         this.clientOpts = {};
@@ -40,11 +40,15 @@ Client.prototype.connect = function () {
         return Promise.resolve();
     }
 
+    this.status = 'connecting';
+
     return soap.createClientAsync(this.uri, this.clientOpts)
-        .then(client => {
+        .then((client) => {
             this.client = client;
+            this.client.describe();
+            this.client.setEndpoint(`https://${this.connectionInfo.host}/sdk/vimService.wsdl`);
             return this.runCommand('RetrieveServiceContent', {
-                _this: 'SerivceInstance'
+                _this: 'ServiceInstance'
             });
         })
         .then(content => {
@@ -92,7 +96,13 @@ Client.prototype.close = function () {
     }
 };
 
-Client.prototype.runCommand = function (command, args = {}) {
+Client.prototype.runCommand = function (command, arguments) {
+    let args;
+    if (!arguments || arguments === null) {
+        args = {};
+    } else {
+        args = arguments;
+    }
     if (this.status === 'ready' || this.status === 'connecting') {
         return new Promise((resolve, reject) => {
             this.client.VimService.VimPort[command](args, (err, result, raw, soapHeader) => {
@@ -133,7 +143,7 @@ Client.prototype.soapErrorHandler = function (err, command, args) {
         err = { body: 'general error' };
     }
 
-    if (err.body.match(/session is not authenticated/)) {
+    if (err.body && err.body.match(/session is not authenticated/)) {
         this.status = 'disconnected';
         if (this.reconnectCount < this.reconnectLimit) {
             this.reconnectCount++;
