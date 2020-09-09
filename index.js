@@ -7,7 +7,7 @@ function Client(options = {}) {
     this.reconnectCount = 0;
     this.reconnectLimit = options.reconnectLimit || 10;
 
-    let sslVerify = typeof options.sslVerify !== 'undefined' ? sslVerify : false;
+    let sslVerify = typeof options.sslVerify !== 'undefined' ? options.sslVerify : false;
 
     if (sslVerify) {
         this.clientOpts = {};
