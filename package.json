@@ -1,6 +1,6 @@
 {
   "name": "vsphere-web-services-soap",
-  "version": "1.2.1",
+  "version": "1.2.2",
   "description": "Promise based api to vSphere Web Services SOAP API (based on node-vsphere-soap)",
   "main": "index.js",
   "scripts": {
@@ -18,7 +18,7 @@
   },
   "homepage": "https://github.com/nyxtom/vsphere-web-services-soap#readme",
   "dependencies": {
-    "soap": "^0.34.0",
+    "soap": "^0.38.0",
     "soap-cookie": "^0.10.1"
   }
 }
