@@ -2,10 +2,14 @@ var soap = require('soap');
 var cookie = require('soap-cookie');
 var constants = require('constants');
 
+var DEFAULT_RECONNECT_LIMIT = 10;
+var DEFAULT_TIMEOUT = 2 * 60 * 1000;
+
 function Client(options = {}) {
     this.status = 'disconnected';
     this.reconnectCount = 0;
-    this.reconnectLimit = options.reconnectLimit || 10;
+    this.reconnectLimit = Number.isFinite(options.reconnectLimit) ? options.reconnectLimit : DEFAULT_RECONNECT_LIMIT;
+    this.timeout = Number.isFinite(options.timeout) ? options.timeout : DEFAULT_TIMEOUT;
 
     let sslVerify = typeof options.sslVerify !== 'undefined' ? options.sslVerify : false;
 
@@ -128,7 +132,7 @@ Client.prototype.runCommand = function (command, arguments) {
                 }
 
                 return resolve(result);
-            });
+            }, { timeout: this.timeout });
         });
     } else if (this.status === 'disconnected') {
         return this.connect()
