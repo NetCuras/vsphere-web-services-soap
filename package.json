@@ -1,6 +1,6 @@
 {
   "name": "vsphere-web-services-soap",
-  "version": "1.2.3",
+  "version": "1.2.4",
   "description": "Promise based api to vSphere Web Services SOAP API (based on node-vsphere-soap)",
   "main": "index.js",
   "scripts": {
@@ -8,15 +8,15 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/nyxtom/vsphere-web-services-soap.git"
+    "url": "git+https://github.com/NetCuras/vsphere-web-services-soap.git"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/nyxtom/vsphere-web-services-soap/issues"
+    "url": "https://github.com/NetCuras/vsphere-web-services-soap/issues"
   },
-  "homepage": "https://github.com/nyxtom/vsphere-web-services-soap#readme",
+  "homepage": "https://github.com/NetCuras/vsphere-web-services-soap#readme",
   "dependencies": {
     "soap": "^0.38.0",
     "soap-cookie": "^0.10.1"
